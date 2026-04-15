@@ -1,0 +1,663 @@
+{% comment %}
+  Jersey Customizer — Wizard UI
+  ──────────────────────────────────────────────────────────────
+  Step flow:
+    intro → logo → sponsor → name → number → summary → review
+  ──────────────────────────────────────────────────────────────
+{% endcomment %}
+
+{%- assign front_image   = product.images[0] -%}
+{%- if product.images.size > 1 -%}
+  {%- assign preview_image = product.images[1] -%}
+{%- else -%}
+  {%- assign preview_image = product.images[0] -%}
+{%- endif -%}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+  href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Bebas+Neue&family=Exo+2:wght@800&family=Jersey+M54&family=Josefin+Sans:wght@700&family=Rajdhani:wght@700&family=Rubik:wght@900&family=Teko:wght@700&display=swap"
+  rel="stylesheet"
+>
+<style>
+  @font-face {
+    font-family: 'Freshman';
+    src: url('/apps/jersey-customizer/fonts/freshman') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+</style>
+
+{{ 'jersey-customizer.css' | asset_url | stylesheet_tag }}
+
+<div
+  class="jcw"
+  data-jersey-customizer
+  data-product-id="{{ product.id }}"
+  id="jersey-customizer-{{ block.id }}"
+  {{ block.shopify_attributes }}
+>
+
+  {%- comment -%} ═══════════════════════════════════════════════
+      WIZARD HEADER  —  back button + progress dots
+      Hidden on intro / summary / review (JS controls)
+  ═══════════════════════════════════════════════════════════ {%- endcomment -%}
+
+  <div class="jcw__header" data-wiz-header hidden>
+    <div class="jcw__dots" role="list" aria-label="Customization progress">
+      <span class="jcw__dot" data-dot="logo"    role="listitem" aria-label="Logo step"></span>
+      <span class="jcw__dot" data-dot="sponsor" role="listitem" aria-label="Sponsor step"></span>
+      <span class="jcw__dot" data-dot="name"    role="listitem" aria-label="Name step"></span>
+      <span class="jcw__dot" data-dot="number"  role="listitem" aria-label="Number step"></span>
+    </div>
+    <span class="jcw__step-counter" data-wiz-counter aria-live="polite"></span>
+  </div>
+
+  {%- comment -%} ═══════════════════════════════════════════════
+      SHARED CANVAS AREA
+      The wizard shows the right canvas(es) per step.
+      Front canvas is visible on: intro, logo, sponsor, review.
+      Back canvas is visible on:  name, number, review.
+      Both are hidden on: summary.
+      On review, both show side-by-side via --review modifier.
+  ═══════════════════════════════════════════════════════════ {%- endcomment -%}
+
+  <div class="jcw__canvases" data-wiz-canvases>
+
+    {%- comment -%} Front jersey canvas — logo + sponsor overlays {%- endcomment -%}
+    <div class="jcw__canvas-outer" data-canvas-front>
+      <div
+        class="jersey-customizer__preview{% unless front_image %} jersey-customizer__preview--no-image{% endunless %}"
+        data-front-canvas
+      >
+        {%- if front_image -%}
+          <img
+            class="jersey-customizer__jersey-img"
+            src="{{ front_image | image_url: width: 600 }}"
+            width="{{ front_image.width }}"
+            height="{{ front_image.height }}"
+            alt="Jersey front view"
+            loading="eager"
+            draggable="false"
+          >
+        {%- endif -%}
+
+        <div class="jersey-customizer__logo-wrapper" data-logo-wrapper hidden aria-hidden="true">
+          <img class="jersey-customizer__logo-img" data-logo-img alt="" draggable="false">
+          <span class="jersey-customizer__drag-indicator" aria-hidden="true"></span>
+        </div>
+
+        <div class="jersey-customizer__sponsor-wrapper" data-sponsor-wrapper hidden aria-hidden="true">
+          <img class="jersey-customizer__sponsor-img" data-sponsor-img alt="" draggable="false">
+          <span class="jersey-customizer__sponsor-drag-indicator" aria-hidden="true"></span>
+        </div>
+
+        <span class="jersey-customizer__preview-badge" aria-hidden="true">Front</span>
+      </div>
+    </div>
+
+    {%- comment -%} Back jersey canvas — name + number preview {%- endcomment -%}
+    <div class="jcw__canvas-outer" data-canvas-back hidden>
+      <div
+        class="jersey-customizer__preview{% unless preview_image %} jersey-customizer__preview--no-image{% endunless %}"
+      >
+        {%- if preview_image -%}
+          <img
+            class="jersey-customizer__jersey-img"
+            src="{{ preview_image | image_url: width: 600 }}"
+            width="{{ preview_image.width }}"
+            height="{{ preview_image.height }}"
+            alt="Jersey back view"
+            loading="lazy"
+            draggable="false"
+          >
+        {%- endif -%}
+
+        <div class="jersey-customizer__overlay" aria-hidden="true">
+          <div
+            class="jersey-customizer__preview-name jersey-customizer__preview-name--placeholder"
+            data-preview-name
+            data-placeholder-class="jersey-customizer__preview-name--placeholder"
+          >YOUR NAME</div>
+          <div
+            class="jersey-customizer__preview-number jersey-customizer__preview-number--placeholder"
+            data-preview-number
+            data-placeholder-class="jersey-customizer__preview-number--placeholder"
+          >##</div>
+        </div>
+
+        <span class="jersey-customizer__preview-badge" aria-hidden="true">Back</span>
+      </div>
+    </div>
+
+  </div><!-- /jcw__canvases -->
+
+
+  {%- comment -%} ═══════════════════════════════════════════════
+      STEP: INTRO
+  ═══════════════════════════════════════════════════════════ {%- endcomment -%}
+
+  <div class="jcw__step jcw__step--intro" data-step="intro">
+    <h2 class="jcw__intro-headline">
+      {{ block.settings.widget_title | default: 'Customize It' }}
+    </h2>
+    <p class="jcw__intro-sub">
+      Make it yours — add your club badge, sponsor logo, player name, and number.
+    </p>
+    <button class="jcw__btn jcw__btn--primary jcw__btn--start" data-wiz-start type="button">
+      Let's do this →
+    </button>
+  </div>
+
+
+  {%- comment -%} ═══════════════════════════════════════════════
+      STEP: LOGO  (Step 1)
+  ═══════════════════════════════════════════════════════════ {%- endcomment -%}
+
+  <div class="jcw__step" data-step="logo" hidden>
+
+    <div class="jcw__step-inner" data-logo-step>
+
+      <h3 class="jcw__step-title">
+        <span class="jcw__step-num" aria-hidden="true">1</span>
+        Add a Club Badge
+      </h3>
+
+      {%- comment -%} Method tabs {%- endcomment -%}
+      <div class="jersey-customizer__method-tabs" role="tablist" aria-label="Logo source">
+        <button type="button"
+          class="jersey-customizer__method-tab jersey-customizer__method-tab--active"
+          data-tab="logo-upload" role="tab" aria-selected="true">Upload Your Own</button>
+        <button type="button"
+          class="jersey-customizer__method-tab"
+          data-tab="logo-ai" role="tab" aria-selected="false">Generate with AI</button>
+      </div>
+
+      {%- comment -%} Upload panel {%- endcomment -%}
+      <div class="jersey-customizer__panel" data-panel="logo-upload" role="tabpanel">
+        <div class="jersey-customizer__file-row">
+          <label class="jersey-customizer__file-btn" for="logo-file-{{ block.id }}">
+            <svg class="jersey-customizer__file-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Choose Image
+          </label>
+          <input
+            type="file"
+            id="logo-file-{{ block.id }}"
+            accept="image/png,image/jpeg,image/webp,image/svg+xml"
+            data-logo-file
+            class="jersey-customizer__file-input"
+          >
+          <span class="jersey-customizer__file-name" data-logo-file-name aria-live="polite">No file chosen</span>
+        </div>
+        <p class="jersey-customizer__file-hint">PNG with transparent background recommended</p>
+      </div>
+
+      {%- comment -%} AI panel {%- endcomment -%}
+      <div class="jersey-customizer__panel" data-panel="logo-ai" role="tabpanel" hidden>
+        <div class="jersey-customizer__ai-row">
+          <input
+            type="text"
+            class="jersey-customizer__input jersey-customizer__ai-input"
+            value="A soccer club badge with "
+            placeholder="e.g. a golden lion crest on a navy shield"
+            data-logo-prompt
+            autocomplete="off"
+          >
+          <button type="button" class="jersey-customizer__generate-btn" data-logo-generate>Generate</button>
+        </div>
+        <div class="jersey-customizer__ai-status" data-logo-ai-status role="status" aria-live="polite"></div>
+      </div>
+
+      {%- comment -%} Size picker — revealed after image is placed {%- endcomment -%}
+      <div class="jcw__size-group" data-logo-resize hidden>
+        <p class="jersey-customizer__section-label">Badge Size</p>
+        <div class="jcw__size-btns" role="group" aria-label="Badge size">
+          <button type="button" class="jcw__size-btn" data-logo-size="small" aria-pressed="false">Small</button>
+          <button type="button" class="jcw__size-btn jcw__size-btn--active" data-logo-size="medium" aria-pressed="true">Medium</button>
+          <button type="button" class="jcw__size-btn" data-logo-size="large" aria-pressed="false">Large</button>
+        </div>
+        <p class="jcw__size-hint" data-logo-size-hint>2.25&Prime; &times; 2.75&Prime;</p>
+      </div>
+
+      <p class="jersey-customizer__drag-tip" data-logo-drag-tip hidden>
+        Drag the badge on the jersey preview above to reposition it.
+      </p>
+
+    </div><!-- /data-logo-step -->
+
+    <div class="jcw__step-nav">
+      <button class="jcw__btn jcw__btn--ghost" data-wiz-back type="button">← Back</button>
+      <button class="jcw__btn jcw__btn--primary" data-wiz-next type="button">Next →</button>
+      <button class="jcw__skip" data-wiz-skip type="button">I Don't Want To Add A Logo</button>
+    </div>
+
+  </div><!-- /step logo -->
+
+
+  {%- comment -%} ═══════════════════════════════════════════════
+      STEP: SPONSOR  (Step 2)
+  ═══════════════════════════════════════════════════════════ {%- endcomment -%}
+
+  <div class="jcw__step" data-step="sponsor" hidden>
+
+    <div class="jcw__step-inner" data-sponsor-step>
+
+      <h3 class="jcw__step-title">
+        <span class="jcw__step-num" aria-hidden="true">2</span>
+        Add a Front Sponsor
+      </h3>
+
+      {%- comment -%} Method tabs {%- endcomment -%}
+      <div class="jersey-customizer__method-tabs" role="tablist" aria-label="Sponsor source">
+        <button type="button"
+          class="jersey-customizer__method-tab jersey-customizer__method-tab--active"
+          data-tab="sponsor-upload" role="tab" aria-selected="true">Upload Your Own</button>
+        <button type="button"
+          class="jersey-customizer__method-tab"
+          data-tab="sponsor-ai" role="tab" aria-selected="false">Generate with AI</button>
+      </div>
+
+      {%- comment -%} Upload panel {%- endcomment -%}
+      <div class="jersey-customizer__panel" data-panel="sponsor-upload" role="tabpanel">
+        <div class="jersey-customizer__file-row">
+          <label class="jersey-customizer__file-btn" for="sponsor-file-{{ block.id }}">
+            <svg class="jersey-customizer__file-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Choose Image
+          </label>
+          <input
+            type="file"
+            id="sponsor-file-{{ block.id }}"
+            accept="image/png,image/jpeg,image/webp,image/svg+xml"
+            data-sponsor-file
+            class="jersey-customizer__file-input"
+          >
+          <span class="jersey-customizer__file-name" data-sponsor-file-name aria-live="polite">No file chosen</span>
+        </div>
+        <p class="jersey-customizer__file-hint">Sponsor logo will be centered on the jersey front. PNG with transparent background recommended.</p>
+      </div>
+
+      {%- comment -%} AI panel {%- endcomment -%}
+      <div class="jersey-customizer__panel" data-panel="sponsor-ai" role="tabpanel" hidden>
+        <div class="jersey-customizer__ai-row">
+          <input
+            type="text"
+            class="jersey-customizer__input jersey-customizer__ai-input"
+            value="A professional soccer jersey sponsor logo with "
+            placeholder="e.g. bold red text on a white background"
+            data-sponsor-prompt
+            autocomplete="off"
+          >
+          <button type="button" class="jersey-customizer__generate-btn" data-sponsor-generate>Generate</button>
+        </div>
+        <div class="jersey-customizer__ai-status" data-sponsor-ai-status role="status" aria-live="polite"></div>
+      </div>
+
+      {%- comment -%} Size slider {%- endcomment -%}
+      <div class="jersey-customizer__resize-group" data-sponsor-resize hidden>
+        <div class="jersey-customizer__resize-label-row">
+          <span class="jersey-customizer__section-label">Sponsor Size</span>
+          <span class="jersey-customizer__resize-value" data-sponsor-size-label>Medium</span>
+        </div>
+        <input
+          type="range"
+          class="jersey-customizer__slider"
+          min="15" max="75" value="35" step="1"
+          data-sponsor-slider
+          aria-label="Adjust sponsor size"
+        >
+      </div>
+
+      <p class="jersey-customizer__drag-tip jersey-customizer__drag-tip--sponsor" data-sponsor-drag-tip hidden>
+        Drag the sponsor on the jersey preview above to move it up or down.
+      </p>
+
+    </div><!-- /data-sponsor-step -->
+
+    <div class="jcw__step-nav">
+      <button class="jcw__btn jcw__btn--ghost" data-wiz-back type="button">← Back</button>
+      <button class="jcw__btn jcw__btn--primary" data-wiz-next type="button">Next →</button>
+      <button class="jcw__skip" data-wiz-skip type="button">I Don't Want To Add A Sponsor</button>
+    </div>
+
+  </div><!-- /step sponsor -->
+
+
+  {%- comment -%} ═══════════════════════════════════════════════
+      STEP: NAME  (Step 3)
+  ═══════════════════════════════════════════════════════════ {%- endcomment -%}
+
+  <div class="jcw__step" data-step="name" hidden>
+
+    <h3 class="jcw__step-title">
+      <span class="jcw__step-num" aria-hidden="true">3</span>
+      Add a Player Name
+    </h3>
+
+    <div class="jersey-customizer__field">
+      <label class="jersey-customizer__label" for="jersey-name-{{ block.id }}">
+        {{ block.settings.name_label | default: 'Player Name' }}
+      </label>
+      <input
+        class="jersey-customizer__input"
+        type="text"
+        id="jersey-name-{{ block.id }}"
+        data-jersey-name
+        data-max-length="{{ block.settings.mnl | default: 20 }}"
+        placeholder="{{ block.settings.name_placeholder | default: 'e.g. RODRIGUEZ' }}"
+        maxlength="{{ block.settings.mnl | default: 20 }}"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="characters"
+        spellcheck="false"
+      >
+      <span class="jersey-customizer__error" data-name-error role="alert"></span>
+    </div>
+
+    {%- comment -%} Font selector {%- endcomment -%}
+    <div class="jersey-customizer__font-section">
+      <p class="jersey-customizer__section-label">Font Style</p>
+      <div class="jersey-customizer__font-list" role="listbox" aria-label="Choose a font style">
+
+        <button type="button" class="jersey-customizer__font-btn jersey-customizer__font-btn--active"
+          role="option" aria-selected="true"
+          data-font-name="Jersey M54" data-font-css="'Jersey M54', Impact, sans-serif"
+          style="font-family: 'Jersey M54', Impact, sans-serif">
+          <span class="jersey-customizer__font-sample">10</span>
+          <span class="jersey-customizer__font-label">Jersey M54</span>
+        </button>
+
+        <button type="button" class="jersey-customizer__font-btn"
+          role="option" aria-selected="false"
+          data-font-name="Varsity" data-font-css="'Rubik', Impact, sans-serif"
+          style="font-family: 'Rubik', Impact, sans-serif; font-weight: 900">
+          <span class="jersey-customizer__font-sample">10</span>
+          <span class="jersey-customizer__font-label">Varsity</span>
+        </button>
+
+        <button type="button" class="jersey-customizer__font-btn"
+          role="option" aria-selected="false"
+          data-font-name="Impact" data-font-css="Impact, Arial Narrow, sans-serif"
+          style="font-family: Impact, Arial Narrow, sans-serif">
+          <span class="jersey-customizer__font-sample">10</span>
+          <span class="jersey-customizer__font-label">Impact</span>
+        </button>
+
+        <button type="button" class="jersey-customizer__font-btn"
+          role="option" aria-selected="false"
+          data-font-name="Eurostile" data-font-css="'Exo 2', sans-serif"
+          style="font-family: 'Exo 2', sans-serif; font-weight: 800">
+          <span class="jersey-customizer__font-sample">10</span>
+          <span class="jersey-customizer__font-label">Eurostile</span>
+        </button>
+
+        <button type="button" class="jersey-customizer__font-btn"
+          role="option" aria-selected="false"
+          data-font-name="Predator" data-font-css="'Teko', Impact, sans-serif"
+          style="font-family: 'Teko', Impact, sans-serif; font-weight: 700">
+          <span class="jersey-customizer__font-sample">10</span>
+          <span class="jersey-customizer__font-label">Predator</span>
+        </button>
+
+        <button type="button" class="jersey-customizer__font-btn"
+          role="option" aria-selected="false"
+          data-font-name="Nordin" data-font-css="'Alfa Slab One', Georgia, serif"
+          style="font-family: 'Alfa Slab One', Georgia, serif">
+          <span class="jersey-customizer__font-sample">10</span>
+          <span class="jersey-customizer__font-label">Nordin</span>
+        </button>
+
+        <button type="button" class="jersey-customizer__font-btn"
+          role="option" aria-selected="false"
+          data-font-name="Futura" data-font-css="'Josefin Sans', sans-serif"
+          style="font-family: 'Josefin Sans', sans-serif; font-weight: 700">
+          <span class="jersey-customizer__font-sample">10</span>
+          <span class="jersey-customizer__font-label">Futura</span>
+        </button>
+
+        <button type="button" class="jersey-customizer__font-btn"
+          role="option" aria-selected="false"
+          data-font-name="Integral" data-font-css="'Rajdhani', sans-serif"
+          style="font-family: 'Rajdhani', sans-serif; font-weight: 700">
+          <span class="jersey-customizer__font-sample">10</span>
+          <span class="jersey-customizer__font-label">Integral</span>
+        </button>
+
+        <button type="button" class="jersey-customizer__font-btn"
+          role="option" aria-selected="false"
+          data-font-name="Buinton" data-font-css="'Bebas Neue', Impact, sans-serif"
+          style="font-family: 'Bebas Neue', Impact, sans-serif">
+          <span class="jersey-customizer__font-sample">10</span>
+          <span class="jersey-customizer__font-label">Buinton</span>
+        </button>
+
+        <button type="button" class="jersey-customizer__font-btn"
+          role="option" aria-selected="false"
+          data-font-name="Freshman" data-font-css="'Freshman', Impact, sans-serif"
+          style="font-family: 'Freshman', Impact, sans-serif">
+          <span class="jersey-customizer__font-sample">10</span>
+          <span class="jersey-customizer__font-label">Freshman</span>
+        </button>
+
+      </div>
+    </div>
+
+    {%- comment -%} Color selector {%- endcomment -%}
+    <div class="jersey-customizer__color-section">
+      <p class="jersey-customizer__section-label">Text Color</p>
+      <div class="jersey-customizer__color-list" role="listbox" aria-label="Choose text color">
+
+        <button type="button"
+          class="jersey-customizer__color-btn jersey-customizer__color-btn--active"
+          role="option" aria-selected="true" aria-label="White"
+          data-color="#ffffff" data-color-name="White"
+          style="background: #ffffff"></button>
+
+        <button type="button"
+          class="jersey-customizer__color-btn"
+          role="option" aria-selected="false" aria-label="Black"
+          data-color="#000000" data-color-name="Black"
+          style="background: #000000"></button>
+
+      </div>
+    </div>
+
+    <div class="jcw__step-nav">
+      <button class="jcw__btn jcw__btn--ghost" data-wiz-back type="button">← Back</button>
+      <button class="jcw__btn jcw__btn--primary" data-wiz-next type="button">Next →</button>
+      <button class="jcw__skip" data-wiz-skip type="button">I Don't Want To Add A Name</button>
+    </div>
+
+  </div><!-- /step name -->
+
+
+  {%- comment -%} ═══════════════════════════════════════════════
+      STEP: NUMBER  (Step 4)
+  ═══════════════════════════════════════════════════════════ {%- endcomment -%}
+
+  <div class="jcw__step" data-step="number" hidden>
+
+    <h3 class="jcw__step-title">
+      <span class="jcw__step-num" aria-hidden="true">4</span>
+      Add a Jersey Number
+    </h3>
+
+    <div class="jersey-customizer__field">
+      <label class="jersey-customizer__label" for="jersey-number-{{ block.id }}">
+        {{ block.settings.number_label | default: 'Jersey Number' }}
+      </label>
+      <input
+        class="jersey-customizer__input jcw__number-input"
+        type="number"
+        id="jersey-number-{{ block.id }}"
+        data-jersey-number
+        data-max="{{ block.settings.max_number | default: 99 }}"
+        placeholder="{{ block.settings.number_placeholder | default: '10' }}"
+        min="0"
+        max="{{ block.settings.max_number | default: 99 }}"
+        autocomplete="off"
+      >
+      <span class="jersey-customizer__error" data-number-error role="alert"></span>
+    </div>
+
+    <p class="jcw__number-hint">
+      Numbers from 0 to {{ block.settings.max_number | default: 99 }}.
+      Font and color carry over from the name step.
+    </p>
+
+    <div class="jcw__step-nav">
+      <button class="jcw__btn jcw__btn--ghost" data-wiz-back type="button">← Back</button>
+      <button class="jcw__btn jcw__btn--primary" data-wiz-next type="button">Next →</button>
+      <button class="jcw__skip" data-wiz-skip type="button">I Don't Want To Add A Number</button>
+    </div>
+
+  </div><!-- /step number -->
+
+
+  {%- comment -%} ═══════════════════════════════════════════════
+      STEP: SUMMARY
+  ═══════════════════════════════════════════════════════════ {%- endcomment -%}
+
+  <div class="jcw__step jcw__step--summary" data-step="summary" hidden>
+
+    <h3 class="jcw__summary-headline">Your Customization</h3>
+    <p class="jcw__summary-sub">Here's what you've added so far:</p>
+
+    <ul class="jcw__summary-list" aria-label="Customization summary">
+
+      <li class="jcw__summary-row" data-summary-row="logo">
+        <span class="jcw__summary-icon" data-summary-icon="logo" aria-hidden="true">○</span>
+        <span class="jcw__summary-label">Club Badge</span>
+        <span class="jcw__summary-val" data-summary-val="logo">—</span>
+      </li>
+
+      <li class="jcw__summary-row" data-summary-row="sponsor">
+        <span class="jcw__summary-icon" data-summary-icon="sponsor" aria-hidden="true">○</span>
+        <span class="jcw__summary-label">Front Sponsor</span>
+        <span class="jcw__summary-val" data-summary-val="sponsor">—</span>
+      </li>
+
+      <li class="jcw__summary-row" data-summary-row="name">
+        <span class="jcw__summary-icon" data-summary-icon="name" aria-hidden="true">○</span>
+        <span class="jcw__summary-label">Player Name</span>
+        <span class="jcw__summary-val" data-summary-val="name">—</span>
+      </li>
+
+      <li class="jcw__summary-row" data-summary-row="number">
+        <span class="jcw__summary-icon" data-summary-icon="number" aria-hidden="true">○</span>
+        <span class="jcw__summary-label">Jersey Number</span>
+        <span class="jcw__summary-val" data-summary-val="number">—</span>
+      </li>
+
+    </ul>
+
+    <div class="jcw__step-nav">
+      <button class="jcw__btn jcw__btn--ghost" data-wiz-back type="button">← Back</button>
+      <button class="jcw__btn jcw__btn--primary jcw__btn--review" data-wiz-to-review type="button">
+        Review &amp; Add to Cart →
+      </button>
+      <button class="jcw__edit-link" data-wiz-restart type="button">
+        ← Edit customizations
+      </button>
+    </div>
+
+  </div><!-- /step summary -->
+
+
+  {%- comment -%} ═══════════════════════════════════════════════
+      STEP: REVIEW
+  ═══════════════════════════════════════════════════════════ {%- endcomment -%}
+
+  <div class="jcw__step jcw__step--review" data-step="review" hidden>
+
+    <h3 class="jcw__review-headline">Review Your Jersey</h3>
+
+    <ul class="jcw__review-list" data-review-list aria-label="Order summary">
+      {%- comment -%} Populated dynamically by JS {%- endcomment -%}
+    </ul>
+
+    <label class="jcw__agree-label">
+      <input class="jcw__agree-check" type="checkbox" data-wiz-agree>
+      <span>I understand customized items are <strong>final sale</strong> and cannot be returned or exchanged.</span>
+    </label>
+
+    <div class="jcw__step-nav">
+      <button class="jcw__btn jcw__btn--ghost" data-wiz-back type="button">← Back</button>
+      <button
+        class="jcw__btn jcw__btn--primary jcw__btn--atc"
+        data-wiz-submit
+        type="button"
+        disabled
+      >
+        Add to Cart
+      </button>
+      <div class="jcw__upload-status" data-wiz-upload-status hidden aria-live="polite">
+        Saving images… please wait.
+      </div>
+      <button class="jcw__edit-link" data-wiz-restart type="button">
+        ← Edit customizations
+      </button>
+    </div>
+
+  </div><!-- /step review -->
+
+</div><!-- /jcw -->
+
+<script src="{{ 'jersey-customizer.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Jersey Customizer",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "widget_title",
+      "label": "Intro Headline",
+      "default": "Customize It"
+    },
+    {
+      "type": "text",
+      "id": "name_label",
+      "label": "Name Field Label",
+      "default": "Player Name"
+    },
+    {
+      "type": "text",
+      "id": "name_placeholder",
+      "label": "Name Placeholder",
+      "default": "e.g. RODRIGUEZ"
+    },
+    {
+      "type": "range",
+      "id": "mnl",
+      "label": "Max Name Length",
+      "min": 5,
+      "max": 30,
+      "step": 1,
+      "default": 20
+    },
+    {
+      "type": "text",
+      "id": "number_label",
+      "label": "Number Field Label",
+      "default": "Jersey Number"
+    },
+    {
+      "type": "text",
+      "id": "number_placeholder",
+      "label": "Number Placeholder",
+      "default": "10"
+    },
+    {
+      "type": "range",
+      "id": "max_number",
+      "label": "Max Jersey Number",
+      "min": 9,
+      "max": 99,
+      "step": 1,
+      "default": 99
+    }
+  ]
+}
+{% endschema %}

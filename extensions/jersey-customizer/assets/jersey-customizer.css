@@ -1,0 +1,1470 @@
+/* ─── Jersey Customizer Widget ─────────────────────────────── */
+
+.jersey-customizer {
+  font-family: inherit;
+  margin: 24px 0;
+}
+
+.jersey-customizer__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+}
+
+/* Shared section label style (used above font selector and inputs) */
+.jersey-customizer__section-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.75;
+  margin: 0 0 8px;
+}
+
+/* ── Preview Container ─────────────────────────────────────── */
+
+.jersey-customizer__preview {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  max-width: 340px;
+  width: 100%;
+  margin: 0 auto 20px;
+  background: #111827;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  user-select: none;
+}
+
+.jersey-customizer__preview--no-image {
+  background: linear-gradient(150deg, #0d1b2a 0%, #1b2a3b 50%, #0a3055 100%);
+}
+
+.jersey-customizer__preview::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    55deg,
+    transparent 0px,
+    transparent 20px,
+    rgba(0, 0, 0, 0.04) 20px,
+    rgba(0, 0, 0, 0.04) 40px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Jersey Image ───────────────────────────────────────────── */
+
+.jersey-customizer__jersey-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+/* ── Text Overlay ───────────────────────────────────────────── */
+
+.jersey-customizer__overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 28%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ── Jersey Name ────────────────────────────────────────────── */
+
+.jersey-customizer__preview-name {
+  /* Font family is overridden in real-time by JS */
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: clamp(1.4rem, 9cqi, 2.4rem);
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #ffffff;
+  line-height: 1;
+  max-width: 90%;
+  text-align: center;
+  word-break: break-word;
+  transition: opacity 0.1s ease, font-family 0s;
+}
+
+/* ── Jersey Number ──────────────────────────────────────────── */
+
+.jersey-customizer__preview-number {
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: clamp(3rem, 22cqi, 5.5rem);
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  line-height: 1;
+  text-align: center;
+  transition: opacity 0.1s ease, font-family 0s;
+}
+
+.jersey-customizer__preview-name--placeholder,
+.jersey-customizer__preview-number--placeholder {
+  opacity: 0.3;
+}
+
+/* ── "Preview" badge ────────────────────────────────────────── */
+
+.jersey-customizer__preview-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(0, 0, 0, 0.45);
+  padding: 3px 7px;
+  border-radius: 4px;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* ── Font Selector ──────────────────────────────────────────── */
+
+.jersey-customizer__font-section {
+  margin-bottom: 18px;
+}
+
+/*
+ * Scrollable row. The wrapper uses a right-edge gradient to
+ * hint that more options are off-screen.
+ */
+.jersey-customizer__font-section {
+  position: relative;
+}
+
+.jersey-customizer__font-section::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 26px; /* below the label */
+  bottom: 0;
+  width: 40px;
+  background: linear-gradient(to right, transparent, var(--color-background, #fff) 85%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.jersey-customizer__font-list {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 6px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  /* hide scrollbar — navigation is via swipe / arrow keys */
+  scrollbar-width: none;
+}
+
+.jersey-customizer__font-list::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Individual font chip ───────────────────────────────────── */
+
+.jersey-customizer__font-btn {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 76px;
+  height: 76px;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.02);
+  cursor: pointer;
+  padding: 8px 4px 6px;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+  /* Reset button default styles */
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+}
+
+.jersey-customizer__font-btn:hover {
+  border-color: rgba(0, 0, 0, 0.28);
+  background: rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+}
+
+.jersey-customizer__font-btn:focus-visible {
+  border-color: #e8405a;
+  box-shadow: 0 0 0 3px rgba(232, 64, 90, 0.2);
+}
+
+/* Active / selected chip */
+.jersey-customizer__font-btn--active {
+  border-color: #e8405a;
+  background: rgba(232, 64, 90, 0.07);
+  transform: translateY(-1px);
+}
+
+.jersey-customizer__font-btn--active:hover {
+  border-color: #e8405a;
+  background: rgba(232, 64, 90, 0.1);
+}
+
+/*
+ * The large sample "10" — rendered in the button's own font-family
+ * (set via inline style in Liquid so each chip uses its own font)
+ */
+.jersey-customizer__font-sample {
+  font-size: 1.75rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #111;
+  /* inherit font-family from the parent button's inline style */
+  font-family: inherit;
+  letter-spacing: -0.01em;
+}
+
+.jersey-customizer__font-btn--active .jersey-customizer__font-sample {
+  color: #e8405a;
+}
+
+/*
+ * The font name label — always in the page's default sans-serif
+ * so it's legible regardless of which font the chip represents.
+ */
+.jersey-customizer__font-label {
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 0.58rem;
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.45);
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 1;
+}
+
+.jersey-customizer__font-btn--active .jersey-customizer__font-label {
+  color: #e8405a;
+  font-weight: 600;
+}
+
+/* ── Text Color Selector ────────────────────────────────────── */
+
+.jersey-customizer__color-section {
+  margin-bottom: 18px;
+}
+
+.jersey-customizer__color-list {
+  display: flex;
+  gap: 10px;
+}
+
+.jersey-customizer__color-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  outline: 2px solid rgba(0, 0, 0, 0.15);
+  outline-offset: 1px;
+  cursor: pointer;
+  padding: 0;
+  box-sizing: border-box;
+  transition: outline-color 0.15s ease, transform 0.1s ease;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.jersey-customizer__color-btn:hover {
+  transform: scale(1.1);
+  outline-color: rgba(0, 0, 0, 0.3);
+}
+
+.jersey-customizer__color-btn:focus-visible {
+  outline-color: #e8405a;
+  box-shadow: 0 0 0 3px rgba(232, 64, 90, 0.2);
+}
+
+.jersey-customizer__color-btn--active {
+  outline-color: #e8405a;
+  outline-width: 2px;
+  border-color: #e8405a;
+  transform: scale(1.1);
+}
+
+/* ── Name + Number Input Fields ─────────────────────────────── */
+
+.jersey-customizer__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 480px) {
+  .jersey-customizer__fields { grid-template-columns: 1fr; }
+}
+
+.jersey-customizer__field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.jersey-customizer__label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.jersey-customizer__label-required {
+  color: #e8405a;
+  margin-left: 2px;
+}
+
+.jersey-customizer__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 13px;
+  border: 2px solid rgba(0, 0, 0, 0.14);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: rgba(0, 0, 0, 0.03);
+  transition: border-color 0.18s, box-shadow 0.18s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.jersey-customizer__input:focus {
+  outline: none;
+  border-color: #e8405a;
+  box-shadow: 0 0 0 3px rgba(232, 64, 90, 0.14);
+  background: #fff;
+}
+
+.jersey-customizer__input--error {
+  border-color: #c0392b !important;
+  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.12) !important;
+}
+
+.jersey-customizer__input[type="number"] { -moz-appearance: textfield; }
+.jersey-customizer__input[type="number"]::-webkit-inner-spin-button,
+.jersey-customizer__input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+/* ── Validation errors ──────────────────────────────────────── */
+
+.jersey-customizer__error {
+  font-size: 0.78rem;
+  color: #c0392b;
+  min-height: 1.1em;
+}
+
+/* ── Helper note ────────────────────────────────────────────── */
+
+.jersey-customizer__helper {
+  margin-top: 12px;
+  font-size: 0.78rem;
+  opacity: 0.55;
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  line-height: 1.4;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FRONT JERSEY CUSTOMIZER — Logo & Sponsor
+══════════════════════════════════════════════════════════════ */
+
+/* ── Logo overlay (draggable) ──────────────────────────────── */
+
+.jersey-customizer__logo-wrapper {
+  position: absolute;
+  left: 12%;
+  top: 15%;
+  width: 35%;           /* updated live by the size slider */
+  z-index: 4;           /* sits above sponsor (z-index 3) so both are independently draggable */
+  cursor: grab;
+  touch-action: none;   /* required for pointer events on touch */
+  user-select: none;
+  -webkit-user-select: none;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.45));
+  transition: filter 0.15s ease;
+}
+
+.jersey-customizer__logo-wrapper:hover {
+  filter: drop-shadow(0 3px 10px rgba(0,0,0,0.6));
+}
+
+.jersey-customizer__logo-wrapper[style*="grabbing"],
+.jersey-customizer__logo-wrapper:active {
+  cursor: grabbing;
+}
+
+.jersey-customizer__logo-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+}
+
+/* Subtle "move" indicator dots on hover */
+.jersey-customizer__drag-indicator {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  background: rgba(255,255,255,0.92);
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  line-height: 1;
+  color: rgba(0,0,0,0.55);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.jersey-customizer__drag-indicator::before {
+  content: "⠿";
+}
+
+.jersey-customizer__logo-wrapper:hover .jersey-customizer__drag-indicator {
+  opacity: 1;
+}
+
+/* ── Sponsor overlay (centered horizontally, draggable vertically) ── */
+
+.jersey-customizer__sponsor-wrapper {
+  position: absolute;
+  /* Horizontal centering: left + negative translateX keeps it centred
+     no matter how the width changes. Only `top` is updated by drag. */
+  left: 50%;
+  top: 45%;
+  transform: translateX(-50%);
+  width: 35%;           /* default: ~35% of jersey width — updated live by JS slider */
+  z-index: 3;
+  cursor: grab;
+  touch-action: none;   /* required for pointer events on touch */
+  user-select: none;
+  -webkit-user-select: none;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.35));
+  transition: filter 0.15s ease;
+}
+
+.jersey-customizer__sponsor-wrapper:hover {
+  filter: drop-shadow(0 3px 12px rgba(0,0,0,0.5));
+}
+
+.jersey-customizer__sponsor-wrapper[style*="grabbing"],
+.jersey-customizer__sponsor-wrapper:active {
+  cursor: grabbing;
+}
+
+.jersey-customizer__sponsor-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* Vertical-only drag indicator — appears on hover, uses ↕ arrows */
+.jersey-customizer__sponsor-drag-indicator {
+  position: absolute;
+  top: 50%;
+  right: -8px;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 26px;
+  background: rgba(255,255,255,0.92);
+  border-radius: 9px;
+  border: 1.5px solid rgba(0,0,0,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  line-height: 1;
+  color: rgba(0,0,0,0.5);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.jersey-customizer__sponsor-drag-indicator::before {
+  content: "↕";
+}
+
+.jersey-customizer__sponsor-wrapper:hover .jersey-customizer__sponsor-drag-indicator {
+  opacity: 1;
+}
+
+/* Sponsor drag-tip uses horizontal arrow hint only */
+.jersey-customizer__drag-tip--sponsor::before {
+  content: "↕";
+}
+
+/* ── Front step containers ─────────────────────────────────── */
+
+.jersey-customizer__front-step {
+  margin-bottom: 20px;
+}
+
+.jersey-customizer__front-step--sponsor {
+  border-top: 1px dashed rgba(0,0,0,0.1);
+  padding-top: 16px;
+}
+
+/* Step heading with numbered badge */
+.jersey-customizer__step-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+}
+
+.jersey-customizer__step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #e8405a;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* Section heading (used for "Back of Jersey") */
+.jersey-customizer__section-heading {
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+  opacity: 0.7;
+}
+
+/* ── Method tabs (Upload / AI) ─────────────────────────────── */
+
+.jersey-customizer__method-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.jersey-customizer__method-tab {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border: 2px solid rgba(0,0,0,0.12);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.02);
+  color: rgba(0,0,0,0.55);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  text-align: center;
+  font-family: inherit;
+}
+
+.jersey-customizer__method-tab:hover {
+  border-color: rgba(0,0,0,0.25);
+  color: rgba(0,0,0,0.75);
+}
+
+.jersey-customizer__method-tab:focus-visible {
+  border-color: #e8405a;
+  box-shadow: 0 0 0 3px rgba(232,64,90,0.2);
+}
+
+.jersey-customizer__method-tab--active {
+  border-color: #e8405a;
+  background: rgba(232,64,90,0.07);
+  color: #e8405a;
+}
+
+/* ── File upload row ───────────────────────────────────────── */
+
+.jersey-customizer__panel {
+  margin-bottom: 4px;
+}
+
+.jersey-customizer__file-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Visually hidden file input */
+.jersey-customizer__file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.jersey-customizer__file-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  letter-spacing: 0.03em;
+  border: 2px solid rgba(0,0,0,0.15);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.03);
+  color: rgba(0,0,0,0.7);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.jersey-customizer__file-btn:hover {
+  border-color: #e8405a;
+  background: rgba(232,64,90,0.05);
+  color: #e8405a;
+}
+
+.jersey-customizer__file-icon {
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+.jersey-customizer__file-name {
+  font-size: 0.78rem;
+  color: rgba(0,0,0,0.45);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+}
+
+.jersey-customizer__file-hint {
+  margin: 6px 0 0;
+  font-size: 0.72rem;
+  color: rgba(0,0,0,0.4);
+  line-height: 1.4;
+}
+
+/* ── AI generate row ───────────────────────────────────────── */
+
+.jersey-customizer__ai-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.jersey-customizer__ai-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.jersey-customizer__generate-btn {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: #e8405a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+}
+
+.jersey-customizer__generate-btn:hover {
+  background: #d4304a;
+  transform: translateY(-1px);
+}
+
+.jersey-customizer__generate-btn:focus-visible {
+  box-shadow: 0 0 0 3px rgba(232,64,90,0.3);
+}
+
+.jersey-customizer__generate-btn:active {
+  transform: translateY(0);
+}
+
+.jersey-customizer__generate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Loading state — spinning indicator before button text */
+@keyframes jc-spin {
+  to { transform: rotate(360deg); }
+}
+
+.jersey-customizer__generate-btn--loading {
+  pointer-events: none;
+}
+
+.jersey-customizer__generate-btn--loading::before {
+  content: "";
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: jc-spin 0.65s linear infinite;
+  margin-right: 7px;
+  vertical-align: -1px;
+}
+
+/* AI status feedback */
+.jersey-customizer__ai-status {
+  margin-top: 8px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  min-height: 1.1em;
+  border-radius: 6px;
+  padding: 0;
+  transition: padding 0.15s ease;
+}
+
+.jersey-customizer__ai-status:not(:empty) {
+  padding: 8px 10px;
+}
+
+.jersey-customizer__ai-status--loading {
+  background: rgba(232,64,90,0.07);
+  color: #c0392b;
+}
+
+.jersey-customizer__ai-status--success {
+  background: rgba(39,174,96,0.1);
+  color: #1e8449;
+}
+
+.jersey-customizer__ai-status--error {
+  background: rgba(192,57,43,0.08);
+  color: #c0392b;
+}
+
+.jersey-customizer__ai-status--info {
+  background: rgba(0,0,0,0.04);
+  color: rgba(0,0,0,0.55);
+}
+
+/* ── Logo size slider ──────────────────────────────────────── */
+
+.jersey-customizer__resize-group {
+  margin-top: 14px;
+}
+
+.jersey-customizer__resize-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.jersey-customizer__resize-value {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #e8405a;
+  letter-spacing: 0.04em;
+}
+
+.jersey-customizer__slider {
+  width: 100%;
+  height: 4px;
+  border-radius: 4px;
+  appearance: none;
+  -webkit-appearance: none;
+  /* Neutral fallback — JS always overrides this via style.background directly,
+     which is more reliable than CSS custom properties on range inputs inside
+     containers that themes may un-hide via [hidden]{display:block} overrides. */
+  background: rgba(0,0,0,0.12);
+  outline: none;
+  cursor: pointer;
+}
+
+.jersey-customizer__slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #e8405a;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  cursor: grab;
+  transition: transform 0.1s ease;
+}
+
+.jersey-customizer__slider::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.2);
+}
+
+.jersey-customizer__slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #e8405a;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  cursor: grab;
+}
+
+/* ── Drag tip ──────────────────────────────────────────────── */
+
+.jersey-customizer__drag-tip {
+  margin-top: 8px;
+  font-size: 0.72rem;
+  color: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  line-height: 1.4;
+}
+
+.jersey-customizer__drag-tip::before {
+  content: "↕";
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
+/* ── Section divider ───────────────────────────────────────── */
+
+.jersey-customizer__divider {
+  margin: 24px 0 20px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(0,0,0,0.12) 20%, rgba(0,0,0,0.12) 80%, transparent);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   WIZARD CHROME  (.jcw__*)
+   All styles for the step-by-step wizard layout.
+   Existing .jersey-customizer__* styles are untouched.
+══════════════════════════════════════════════════════════════ */
+
+/* ── Wizard root ────────────────────────────────────────────── */
+
+.jcw {
+  font-family: inherit;
+  margin: 24px 0;
+}
+
+/* ── Wizard header: back button + progress dots + counter ───── */
+
+.jcw__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.jcw__back-btn {
+  flex-shrink: 0;
+  padding: 6px 0;
+  background: none;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  letter-spacing: 0.03em;
+  color: rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: color 0.15s ease;
+  white-space: nowrap;
+}
+
+.jcw__back-btn:hover {
+  color: #e8405a;
+}
+
+.jcw__back-btn:focus-visible {
+  outline: 2px solid #e8405a;
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.jcw__dots {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+}
+
+.jcw__dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.12);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.jcw__dot--active {
+  background: #e8405a;
+  transform: scale(1.3);
+}
+
+.jcw__dot--done {
+  background: rgba(232, 64, 90, 0.38);
+}
+
+.jcw__step-counter {
+  flex-shrink: 0;
+  min-width: 38px;
+  text-align: right;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: rgba(0, 0, 0, 0.28);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Canvas area ────────────────────────────────────────────── */
+
+.jcw__canvases {
+  margin-bottom: 18px;
+  /* Single canvas: full width */
+}
+
+/* Side-by-side during review step */
+.jcw__canvases--review {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: center;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.jcw__canvas-outer {
+  width: 100%;
+}
+
+.jcw__canvases--review .jcw__canvas-outer {
+  flex: 0 1 320px;  /* shrink if needed, but never grow beyond 320px */
+  min-width: 0;
+  max-width: 340px;
+}
+
+/* ── Step panels ────────────────────────────────────────────── */
+
+.jcw__step {
+  animation: jcw-step-in 0.18s ease;
+}
+
+@keyframes jcw-step-in {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+.jcw__step-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin: 0 0 16px;
+}
+
+/* Numbered badge — same appearance as .jersey-customizer__step-num */
+.jcw__step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e8405a;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.jcw__step-inner {
+  margin-bottom: 16px;
+}
+
+/* ── Step navigation row ────────────────────────────────────── */
+
+.jcw__step-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+/* ── Primary wizard button ──────────────────────────────────── */
+
+.jcw__btn {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 20px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  transition: background 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
+}
+
+.jcw__btn--primary {
+  background: #e8405a;
+  color: #fff;
+}
+
+.jcw__btn--primary:hover {
+  background: #d4304a;
+  transform: translateY(-1px);
+}
+
+.jcw__btn--primary:active {
+  transform: translateY(0);
+}
+
+.jcw__btn--primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.jcw__btn--primary:focus-visible {
+  box-shadow: 0 0 0 3px rgba(232, 64, 90, 0.3);
+}
+
+/* ── Ghost / Back button ────────────────────────────────────── */
+
+.jcw__btn--ghost {
+  background: transparent;
+  color: rgba(0, 0, 0, 0.6);
+  border: 2px solid rgba(0, 0, 0, 0.18);
+}
+
+.jcw__btn--ghost:hover {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.32);
+  transform: translateY(-1px);
+}
+
+.jcw__btn--ghost:active {
+  transform: translateY(0);
+}
+
+.jcw__btn--ghost:focus-visible {
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Skip link ──────────────────────────────────────────────── */
+
+.jcw__skip {
+  background: none;
+  border: none;
+  color: rgba(0, 0, 0, 0.38);
+  font-size: 0.76rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 0;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s ease;
+  display: block;
+  width: 100%;
+}
+
+.jcw__skip:hover {
+  color: rgba(0, 0, 0, 0.65);
+}
+
+/* ── Intro step ─────────────────────────────────────────────── */
+
+.jcw__step--intro {
+  text-align: center;
+  padding: 12px 0 8px;
+}
+
+.jcw__intro-headline {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+  line-height: 1.1;
+}
+
+.jcw__intro-sub {
+  font-size: 0.88rem;
+  opacity: 0.55;
+  margin: 0 0 26px;
+  line-height: 1.55;
+}
+
+.jcw__btn--start {
+  max-width: 260px;
+  margin: 0 auto;
+}
+
+/* ── Number step hint ───────────────────────────────────────── */
+
+.jcw__number-hint {
+  font-size: 0.76rem;
+  opacity: 0.45;
+  margin: 8px 0 0;
+  line-height: 1.4;
+}
+
+/* ── Summary step ───────────────────────────────────────────── */
+
+.jcw__step--summary {
+  padding: 6px 0;
+}
+
+.jcw__summary-headline {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 5px;
+}
+
+.jcw__summary-sub {
+  font-size: 0.82rem;
+  opacity: 0.5;
+  margin: 0 0 18px;
+}
+
+.jcw__summary-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 22px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.jcw__summary-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.055);
+  font-size: 0.86rem;
+}
+
+.jcw__summary-row:last-child {
+  border-bottom: none;
+}
+
+.jcw__summary-icon {
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  width: 18px;
+  text-align: center;
+  color: #e8405a;
+}
+
+.jcw__summary-label {
+  flex: 1;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.72);
+}
+
+.jcw__summary-val {
+  font-size: 0.8rem;
+  color: rgba(0, 0, 0, 0.4);
+  text-align: right;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jcw__btn--review {
+  /* spacing handled by jcw__step-nav gap */
+}
+
+.jcw__edit-link {
+  background: none;
+  border: none;
+  color: rgba(0, 0, 0, 0.38);
+  font-size: 0.76rem;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 4px 0;
+  display: block;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  width: 100%;
+  transition: color 0.15s ease;
+}
+
+.jcw__edit-link:hover {
+  color: rgba(0, 0, 0, 0.65);
+}
+
+/* ── Review step ────────────────────────────────────────────── */
+
+.jcw__step--review {
+  padding: 6px 0;
+}
+
+.jcw__review-headline {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+
+.jcw__review-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+}
+
+.jcw__review-list li {
+  font-size: 0.84rem;
+  color: rgba(0, 0, 0, 0.62);
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.jcw__review-list li:last-child {
+  border-bottom: none;
+}
+
+.jcw__agree-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.68);
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.jcw__agree-check {
+  flex-shrink: 0;
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  accent-color: #e8405a;
+  cursor: pointer;
+}
+
+.jcw__upload-status {
+  margin-top: 10px;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 6px;
+}
+
+/* ── Logo size preset buttons ───────────────────────────────── */
+
+.jcw__size-group {
+  margin-top: 14px;
+}
+
+.jcw__size-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.jcw__size-btn {
+  flex: 1;
+  padding: 9px 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: inherit;
+  letter-spacing: 0.03em;
+  border: 2px solid rgba(0, 0, 0, 0.14);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.02);
+  color: rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+}
+
+.jcw__size-btn:hover {
+  border-color: rgba(0, 0, 0, 0.28);
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.jcw__size-btn:focus-visible {
+  border-color: #e8405a;
+  box-shadow: 0 0 0 3px rgba(232, 64, 90, 0.2);
+}
+
+.jcw__size-btn--active {
+  border-color: #e8405a;
+  background: rgba(232, 64, 90, 0.07);
+  color: #e8405a;
+}
+
+.jcw__size-btn--active:hover {
+  background: rgba(232, 64, 90, 0.12);
+}
+
+.jcw__size-hint {
+  margin: 8px 0 0;
+  font-size: 0.72rem;
+  color: rgba(0, 0, 0, 0.38);
+  letter-spacing: 0.02em;
+}
+
+/* ── Zoom cursor on jersey previews during review ───────────── */
+
+.jcw__canvases--review .jersey-customizer__preview {
+  cursor: zoom-in;
+}
+
+/* ── Lightbox ────────────────────────────────────────────────── */
+
+.jcw__lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+
+.jcw__lightbox--open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.jcw__lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.82);
+  cursor: pointer;
+}
+
+.jcw__lightbox-content {
+  position: relative;
+  z-index: 1;
+  width: min(400px, 88vw);
+}
+
+.jcw__lightbox-close {
+  position: absolute;
+  top: -44px;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1.5px solid rgba(255, 255, 255, 0.32);
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+  padding: 0;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.jcw__lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.jcw__lightbox-close:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* The cloned preview fills the frame and overrides its max-width cap */
+.jcw__lightbox-frame .jersey-customizer__preview {
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  cursor: default !important;
+  border-radius: 14px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+}

@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:www.anthropic.com)",
+      "Bash(npm install:*)",
+      "Bash(ls app/routes/proxy*)",
+      "Bash(node:*)",
+      "Bash(shopify app:*)",
+      "Bash(cloudflared --version)",
+      "Bash(shopify version:*)",
+      "Read(//Users/primussportspartners/.local/share/**)",
+      "Read(//Users/primussportspartners/Library/**)",
+      "Read(//Users/primussportspartners/.local/share/shopify/app/**)",
+      "Bash(timeout 10 npm exec remix vite:dev)",
+      "Bash(npx remix:*)",
+      "Bash(kill %1)",
+      "Bash(wait)",
+      "Bash(xargs ls:*)",
+      "Bash(xargs kill:*)",
+      "Bash(pkill -f \"shopify app dev\")",
+      "Bash(pkill -f \"remix vite:dev\")",
+      "Bash(col -b)",
+      "Bash(npx prisma:*)",
+      "WebFetch(domain:www.remove.bg)",
+      "WebSearch",
+      "WebFetch(domain:shopify.dev)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://fonts.googleapis.com/css2?family=Jersey+M54&display=swap\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://fonts.googleapis.com/css2?family=Jersey%20M54&display=swap\")",
+      "Bash(curl -s -A \"Mozilla/4.0 \\(compatible; MSIE 6.0; Windows NT 5.1\\)\" \"https://fonts.googleapis.com/css2?family=Jersey+M54&display=swap\")",
+      "Bash(sqlite3:*)",
+      "Bash(curl -s -X POST https://the-soccer-spot-arena.myshopify.com/admin/api/2024-10/graphql.json -H 'X-Shopify-Access-Token: shpua_9c1d327b0d8ddba7961c095465441d97' -H 'Content-Type: application/json' -d '{:*)",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl:*)"
+    ]
+  }
+}

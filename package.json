@@ -1,0 +1,40 @@
+{
+  "name": "jersey-customizer",
+  "private": true,
+  "scripts": {
+    "build": "remix vite:build",
+    "dev": "shopify app dev",
+    "setup": "prisma generate && prisma migrate deploy && node scripts/download-fonts.js",
+    "config:link": "shopify app config link",
+    "deploy": "shopify app deploy",
+    "start": "remix-serve ./build/server/index.js",
+    "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
+    "test:print": "node scripts/test-print-files.js"
+  },
+  "type": "module",
+  "engines": {
+    "node": "^18.20 || ^20.10 || >=21.0.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.85.0",
+    "@prisma/client": "^5.19.1",
+    "@remix-run/node": "^2.10.3",
+    "@remix-run/react": "^2.10.3",
+    "@remix-run/serve": "^2.10.3",
+    "@shopify/app-bridge-react": "^4.1.6",
+    "@shopify/polaris": "^13.7.0",
+    "@shopify/shopify-app-remix": "^3.3.0",
+    "@shopify/shopify-app-session-storage-prisma": "^5.1.1",
+    "isbot": "^4.4.0",
+    "opentype.js": "^1.3.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "@remix-run/dev": "^2.10.3",
+    "prisma": "^5.19.1",
+    "vite": "^5.1.3",
+    "vite-tsconfig-paths": "^5.0.1"
+  }
+}

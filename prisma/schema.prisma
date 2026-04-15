@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id            String    @id
+  shop          String
+  state         String
+  isOnline      Boolean   @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean   @default(false)
+  locale        String?
+  collaborator  Boolean?  @default(false)
+  emailVerified Boolean?  @default(false)
+}
+
+/// Temporarily holds uploaded badge / sponsor images while the customer
+/// completes checkout.  The JS widget uploads each image immediately after
+/// it is set and stores the resulting "pending-image:<id>" token as the
+/// Shopify line-item property value (28 chars max) instead of the raw base64
+/// (40–135 KB), which Shopify silently truncates.
+/// The orders/create webhook resolves these tokens back to base64 before
+/// passing them to generateLogoPNG / generateSponsorPNG.
+model PendingImage {
+  id        String   @id @default(cuid())
+  shop      String
+  type      String   // "logo" | "sponsor"
+  data      String   // base64 PNG data URL  (data:image/png;base64,…)
+  createdAt DateTime @default(now())
+
+  @@index([shop])
+}
+
+/// Per-product feature flags that control which wizard steps are shown in
+/// the storefront customizer.  All features default to enabled; a row is
+/// only created when the merchant explicitly changes at least one flag.
+model ProductSettings {
+  id            String   @id @default(cuid())
+  shop          String
+  productId     String   // numeric Shopify product ID (e.g. "1234567890")
+  enableLogo    Boolean  @default(true)
+  enableSponsor Boolean  @default(true)
+  enableName    Boolean  @default(true)
+  enableNumber  Boolean  @default(true)
+  updatedAt     DateTime @updatedAt
+
+  @@unique([shop, productId])
+  @@index([shop])
+}
+
+/// Stores generated print-ready files for each customised jersey line item.
+/// Created by the orders/create webhook; downloaded from the Print Files admin page.
+model PrintJob {
+  id            String   @id @default(cuid())
+  shop          String
+  orderId       String   // numeric Shopify order ID
+  orderGid      String   // gid://shopify/Order/{id}
+  orderName     String   // "#1001"
+  customerName  String   // "Jane Doe" (may be empty for guest)
+  lineItemId    String   // numeric line item ID
+  lineItemTitle String   // product name
+  playerName    String
+  jerseyNumber  String
+  nameSvg       String   // SVG — 11" × 3"  (HTV cut file, Cricut Explore 4)
+  numberSvg     String   // SVG — 6" × 9"   (HTV cut file, Cricut Explore 4)
+  logoPng       String?  // base64 PNG — 750×900 px = 2.5"×3" @300 DPI (DTF, Epson ET-2800)
+  sponsorPng    String?  // base64 PNG — customer-sized @300 DPI (DTF, Epson ET-2800)
+  createdAt     DateTime @default(now())
+
+  @@index([shop])
+  @@index([shop, orderId])
+}

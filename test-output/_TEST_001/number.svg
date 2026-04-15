@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SoccerSpot Jersey Customizer — print-ready HTV cut file
+     Size : 6in × 9in  |  viewBox: 576×864
+     Open in Cricut Design Space → Cut mode → Siser EasyWeed Stretch Matte -->
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="6in" height="9in"
+     viewBox="0 0 576 864"
+     role="img" aria-label="Jersey number: 14">
+
+  <style><![CDATA[@import url('https://fonts.googleapis.com/css2?family=Jersey+M54&display=swap');]]></style>
+  <line x1="0"  y1="0"  x2="18" y2="0"          stroke="#b0b0b0" stroke-width="0.6"/>
+  <line x1="0"  y1="0"  x2="0"      y2="18"      stroke="#b0b0b0" stroke-width="0.6"/>
+  <line x1="576" y1="0"  x2="558" y2="0"        stroke="#b0b0b0" stroke-width="0.6"/>
+  <line x1="576" y1="0"  x2="576"     y2="18"    stroke="#b0b0b0" stroke-width="0.6"/>
+  <line x1="0"  y1="864" x2="18" y2="864"        stroke="#b0b0b0" stroke-width="0.6"/>
+  <line x1="0"  y1="864" x2="0"      y2="846"   stroke="#b0b0b0" stroke-width="0.6"/>
+  <line x1="576" y1="864" x2="558" y2="864"     stroke="#b0b0b0" stroke-width="0.6"/>
+  <line x1="576" y1="864" x2="576"     y2="846" stroke="#b0b0b0" stroke-width="0.6"/>
+  <text
+    x="288" y="432"
+    font-family="&apos;Jersey M54&apos;, Impact, sans-serif"
+    font-size="720"
+    font-weight="400"
+    fill="#ffffff"
+    stroke="none"
+    text-anchor="middle"
+    dominant-baseline="central"
+    textLength="500"
+    lengthAdjust="spacingAndGlyphs"
+  >14</text>
+
+</svg>

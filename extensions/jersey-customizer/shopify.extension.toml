@@ -1,0 +1,7 @@
+api_version = "2024-10"
+uid = "c05f31e9-0623-237d-ef6b-4a645460ccb51d64fa53"
+
+[[extensions]]
+type = "theme"
+name = "Jersey Customizer"
+handle = "jersey-customizer"

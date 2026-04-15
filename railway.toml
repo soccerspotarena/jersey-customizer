@@ -1,0 +1,16 @@
+# Railway deployment configuration
+# https://docs.railway.app/reference/config-as-code
+
+[build]
+# nixpacks auto-runs "npm ci" before this; this step adds Prisma client
+# generation and the Remix production build.
+builder = "nixpacks"
+buildCommand = "npx prisma generate && npm run build"
+
+[deploy]
+# Runs every time the container starts (including deploys and restarts).
+# prisma migrate deploy applies any unapplied migrations safely — it is
+# idempotent and will not re-run already-applied migrations.
+startCommand = "npx prisma migrate deploy && npm run start"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
