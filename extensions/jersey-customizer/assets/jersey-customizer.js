@@ -222,6 +222,18 @@
     // enabled) rather than showing a broken experience.
     var productId = widget.dataset.productId || "";
     fetchProductFeatures(productId, function (features) {
+      // If every feature is explicitly disabled, the widget has nothing to show.
+      // Hide the entire container and bail out — no wizard is initialised.
+      if (
+        features.enableLogo    === false &&
+        features.enableSponsor === false &&
+        features.enableName    === false &&
+        features.enableNumber  === false
+      ) {
+        widget.hidden = true;
+        return;
+      }
+
       initWizard(widget, frontState, nameInput, numberInput, form, features);
     });
   }
