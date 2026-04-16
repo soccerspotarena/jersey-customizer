@@ -1,6 +1,6 @@
 name = "Jersey Customizer"
 client_id = "7ce08e100c2172c75d80ffbc2caccbe7"
-application_url = "https://localhost"
+application_url = "https://jersey-customizer-production.up.railway.app"
 embedded = true
 
 [build]
@@ -11,16 +11,16 @@ scopes = "read_products,write_products,read_orders,write_orders,read_customers"
 
 [auth]
 redirect_urls = [
-  "https://localhost/auth/callback",
-  "https://localhost/auth/shopify/callback",
-  "https://localhost/api/auth/callback"
+  "https://jersey-customizer-production.up.railway.app/auth/callback",
+  "https://jersey-customizer-production.up.railway.app/auth/shopify/callback",
+  "https://jersey-customizer-production.up.railway.app/api/auth/callback"
 ]
 
 [webhooks]
 api_version = "2024-10"
 
 [app_proxy]
-url = "https://localhost/proxy"
+url = "https://jersey-customizer-production.up.railway.app/proxy"
 subpath = "jersey-customizer"
 prefix = "apps"
 

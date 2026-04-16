@@ -7,7 +7,12 @@ if (
   (!process.env.SHOPIFY_APP_URL ||
     process.env.SHOPIFY_APP_URL === process.env.HOST)
 ) {
-  process.env.SHOPIFY_APP_URL = process.env.HOST;
+  const rawHost = process.env.HOST;
+  // SHOPIFY_APP_URL must be a full URL. If HOST is a bare hostname (no
+  // protocol), prepend https:// so new URL() below doesn't throw.
+  process.env.SHOPIFY_APP_URL = /^https?:\/\//.test(rawHost)
+    ? rawHost
+    : `https://${rawHost}`;
   delete process.env.HOST;
 }
 

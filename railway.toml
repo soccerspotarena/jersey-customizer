@@ -11,6 +11,6 @@ buildCommand = "npx prisma generate && npm run build"
 # Runs every time the container starts (including deploys and restarts).
 # prisma migrate deploy applies any unapplied migrations safely — it is
 # idempotent and will not re-run already-applied migrations.
-startCommand = "npx prisma migrate deploy && npm run start"
+startCommand = "npx prisma migrate deploy && HOST=$(echo \"${HOST}\" | sed 's|https://||;s|http://||') npm run start"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
