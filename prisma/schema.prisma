@@ -74,9 +74,10 @@ model PrintJob {
   jerseyNumber  String
   nameSvg       String   // SVG — 11" × 3"  (HTV cut file, Cricut Explore 4)
   numberSvg     String   // SVG — 6" × 9"   (HTV cut file, Cricut Explore 4)
-  logoPng       String?  // base64 PNG — 750×900 px = 2.5"×3" @300 DPI (DTF, Epson ET-2800)
-  sponsorPng    String?  // base64 PNG — customer-sized @300 DPI (DTF, Epson ET-2800)
-  createdAt     DateTime @default(now())
+  logoPng               String?  // base64 PNG — 750×900 px = 2.5"×3" @300 DPI (DTF, Epson ET-2800)
+  sponsorPng            String?  // base64 PNG — customer-sized @300 DPI (DTF, Epson ET-2800)
+  placementPreviewPng   String?  // base64 PNG — 600×800 px composite: jersey + overlaid logo/sponsor at customer-chosen positions
+  createdAt             DateTime @default(now())
 
   @@index([shop])
   @@index([shop, orderId])

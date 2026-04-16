@@ -22,6 +22,7 @@ import {
   generateNumberSVG,
   generateLogoPNG,
   generateSponsorPNG,
+  generatePlacementPreview,
 } from "../lib/print-files.server";
 
 
@@ -60,24 +61,54 @@ export const action = async ({ request }) => {
     const numberSvg = jerseyData.jerseyNumber
       ? generateNumberSVG(jerseyData.jerseyNumber, jerseyData.font, jerseyData.textColor)
       : "";
-    const logoPng    = logoData    ? await generateLogoPNG(logoData)                           : null;
+    const logoPng    = logoData    ? await generateLogoPNG(logoData)                               : null;
     const sponsorPng = sponsorData ? await generateSponsorPNG(sponsorData, jerseyData.sponsorSize) : null;
+
+    // Fetch the jersey front image URL so we can composite the placement preview.
+    // lineItem.product_id is the numeric Shopify product ID from the REST payload.
+    let jerseyImageUrl = null;
+    if (lineItem.product_id) {
+      try {
+        const productRes  = await admin.graphql(
+          `#graphql
+          query GetProductImage($id: ID!) {
+            product(id: $id) { featuredImage { url } }
+          }`,
+          { variables: { id: `gid://shopify/Product/${lineItem.product_id}` } }
+        );
+        const productData = await productRes.json();
+        jerseyImageUrl    = productData?.data?.product?.featuredImage?.url ?? null;
+      } catch (err) {
+        console.warn("[webhook] Could not fetch product image for placement preview:", err?.message);
+      }
+    }
+
+    const placementPreviewPng = await generatePlacementPreview({
+      jerseyImageUrl,
+      logoDataUrl:     logoData,
+      logoPosition:    jerseyData.logoPosition,
+      logoSizeLabel:   jerseyData.logoSizeLabel,
+      sponsorDataUrl:  sponsorData,
+      sponsorPosition: jerseyData.sponsorPosition,
+      sponsorSizePct:  jerseyData.sponsorSize,
+    });
 
     const job = await db.printJob.create({
       data: {
         shop,
-        orderId:       String(order.id),
+        orderId:             String(order.id),
         orderGid,
         orderName,
         customerName,
-        lineItemId:    String(lineItem.id),
-        lineItemTitle: lineItem.title ?? "Jersey",
-        playerName:    jerseyData.playerName,
-        jerseyNumber:  jerseyData.jerseyNumber,
+        lineItemId:          String(lineItem.id),
+        lineItemTitle:       lineItem.title ?? "Jersey",
+        playerName:          jerseyData.playerName,
+        jerseyNumber:        jerseyData.jerseyNumber,
         nameSvg,
         numberSvg,
         logoPng,
         sponsorPng,
+        placementPreviewPng,
       },
     });
 

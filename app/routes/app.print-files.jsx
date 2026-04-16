@@ -38,6 +38,7 @@ import {
   generateNumberSVG,
   generateLogoPNG,
   generateSponsorPNG,
+  generatePlacementPreview,
 } from "../lib/print-files.server";
 
 // ── GraphQL fragment shared by both lookup strategies ─────────────────────────
@@ -50,6 +51,7 @@ const ORDER_FIELDS = `
       node {
         id
         title
+        product { featuredImage { url } }
         customAttributes { key value }
       }
     }
@@ -113,10 +115,11 @@ export const action = async ({ request }) => {
   const customerName = "";
 
   const lineItems = orderNode.lineItems.edges.map(({ node }) => ({
-    id:         node.id.split("/").pop(),
-    title:      node.title,
+    id:             node.id.split("/").pop(),
+    title:          node.title,
+    jerseyImageUrl: node.product?.featuredImage?.url ?? null,
     // GraphQL uses customAttributes {key,value}; extractJerseyData expects {name,value}
-    properties: node.customAttributes.map(({ key, value }) => ({ name: key, value })),
+    properties:     node.customAttributes.map(({ key, value }) => ({ name: key, value })),
   }));
 
   // ── Generate print files for each customised line item ────────────────────
@@ -141,24 +144,35 @@ export const action = async ({ request }) => {
     // base64, and silently returns null.
     const logoData    = await resolveImage(jerseyData.logoImage);
     const sponsorData = await resolveImage(jerseyData.sponsorImage);
-    const logoPng    = logoData    ? await generateLogoPNG(logoData)                             : null;
+    const logoPng    = logoData    ? await generateLogoPNG(logoData)                               : null;
     const sponsorPng = sponsorData ? await generateSponsorPNG(sponsorData, jerseyData.sponsorSize) : null;
+
+    const placementPreviewPng = await generatePlacementPreview({
+      jerseyImageUrl:  lineItem.jerseyImageUrl ?? null,
+      logoDataUrl:     logoData,
+      logoPosition:    jerseyData.logoPosition,
+      logoSizeLabel:   jerseyData.logoSizeLabel,
+      sponsorDataUrl:  sponsorData,
+      sponsorPosition: jerseyData.sponsorPosition,
+      sponsorSizePct:  jerseyData.sponsorSize,
+    });
 
     await db.printJob.create({
       data: {
         shop,
         orderId,
-        orderGid:      orderNode.id,
+        orderGid:            orderNode.id,
         orderName,
         customerName,
-        lineItemId:    lineItem.id,
-        lineItemTitle: lineItem.title,
-        playerName:    jerseyData.playerName,
-        jerseyNumber:  jerseyData.jerseyNumber,
+        lineItemId:          lineItem.id,
+        lineItemTitle:       lineItem.title,
+        playerName:          jerseyData.playerName,
+        jerseyNumber:        jerseyData.jerseyNumber,
         nameSvg,
         numberSvg,
         logoPng,
         sponsorPng,
+        placementPreviewPng,
       },
     });
 
@@ -194,18 +208,19 @@ export const loader = async ({ request }) => {
     orderBy: { createdAt: "desc" },
     take:    200,
     select: {
-      id:            true,
-      orderId:       true,
-      orderName:     true,
-      customerName:  true,
-      lineItemTitle: true,
-      playerName:    true,
-      jerseyNumber:  true,
-      nameSvg:       true,
-      numberSvg:     true,
-      logoPng:       true,
-      sponsorPng:    true,
-      createdAt:     true,
+      id:                   true,
+      orderId:              true,
+      orderName:            true,
+      customerName:         true,
+      lineItemTitle:        true,
+      playerName:           true,
+      jerseyNumber:         true,
+      nameSvg:              true,
+      numberSvg:            true,
+      logoPng:              true,
+      sponsorPng:           true,
+      placementPreviewPng:  true,
+      createdAt:            true,
     },
   });
 
@@ -236,6 +251,11 @@ export default function PrintFilesPage() {
               <li>
                 <strong>Badge PNG</strong> &amp; <strong>Sponsor PNG</strong> — DTF full-colour files.
                 Send directly to your <strong>Epson ET-2800</strong> via your DTF RIP software at 300 DPI.
+              </li>
+              <li>
+                <strong>Placement Preview PNG</strong> — composite reference image (600×800 px) showing
+                the jersey with the badge and sponsor overlaid at the exact position and size the customer
+                chose. Use this to align transfers on the physical jersey before pressing.
               </li>
             </ul>
           </BlockStack>
@@ -274,10 +294,11 @@ export default function PrintFilesPage() {
                 <Text key={job.id + "-c"}>{job.customerName}</Text>,
                 <Text key={job.id + "-p"}>{job.playerName} — #{job.jerseyNumber}</Text>,
                 <InlineStack gap="200" wrap key={job.id + "-btns"}>
-                  {job.nameSvg    && <FileButton jobId={job.id} fileKey="nameSvg"   label="Name (HTV)"   />}
-                  {job.numberSvg  && <FileButton jobId={job.id} fileKey="numberSvg" label="Number (HTV)" />}
-                  {job.logoPng    && <FileButton jobId={job.id} fileKey="logoPng"    label="Badge (DTF)"   />}
-                  {job.sponsorPng && <FileButton jobId={job.id} fileKey="sponsorPng" label="Sponsor (DTF)" />}
+                  {job.nameSvg              && <FileButton jobId={job.id} fileKey="nameSvg"              label="Name (HTV)"          />}
+                  {job.numberSvg            && <FileButton jobId={job.id} fileKey="numberSvg"            label="Number (HTV)"        />}
+                  {job.logoPng              && <FileButton jobId={job.id} fileKey="logoPng"              label="Badge (DTF)"         />}
+                  {job.sponsorPng           && <FileButton jobId={job.id} fileKey="sponsorPng"           label="Sponsor (DTF)"       />}
+                  {job.placementPreviewPng  && <FileButton jobId={job.id} fileKey="placementPreviewPng"  label="Placement Preview"   />}
                 </InlineStack>,
                 <Text key={job.id + "-d"} tone="subdued">
                   {new Date(job.createdAt).toLocaleDateString()}

@@ -20,10 +20,11 @@
 import { db } from "../lib/db.server";
 
 const FILE_MAP = {
-  nameSvg:    { field: "nameSvg",    ext: "svg", suffix: "name",    mime: "image/svg+xml", binary: false },
-  numberSvg:  { field: "numberSvg",  ext: "svg", suffix: "number",  mime: "image/svg+xml", binary: false },
-  logoPng:    { field: "logoPng",    ext: "png", suffix: "badge",   mime: "image/png",     binary: true  },
-  sponsorPng: { field: "sponsorPng", ext: "png", suffix: "sponsor", mime: "image/png",     binary: true  },
+  nameSvg:             { field: "nameSvg",             ext: "svg", suffix: "name",     mime: "image/svg+xml", binary: false },
+  numberSvg:           { field: "numberSvg",           ext: "svg", suffix: "number",   mime: "image/svg+xml", binary: false },
+  logoPng:             { field: "logoPng",             ext: "png", suffix: "badge",    mime: "image/png",     binary: true  },
+  sponsorPng:          { field: "sponsorPng",          ext: "png", suffix: "sponsor",  mime: "image/png",     binary: true  },
+  placementPreviewPng: { field: "placementPreviewPng", ext: "png", suffix: "placement",mime: "image/png",     binary: true  },
 };
 
 export const loader = async ({ request }) => {

@@ -265,12 +265,162 @@ export function extractJerseyData(lineItem) {
   if (!hasAny) return null;
 
   return {
-    playerName:    props["Player Name"]   || "",
-    jerseyNumber:  props["Jersey Number"] || "",
-    font:          props["Font"]          || "Buinton",
-    textColor:     props["Text Color"] === "Black" ? "#000000" : "#ffffff",
-    logoImage:     props["Logo Image"]    || "",
-    sponsorImage:  props["Sponsor Image"] || "",
-    sponsorSize:   props["Sponsor Size"]  || "35%",
+    playerName:      props["Player Name"]      || "",
+    jerseyNumber:    props["Jersey Number"]    || "",
+    font:            props["Font"]             || "Buinton",
+    textColor:       props["Text Color"] === "Black" ? "#000000" : "#ffffff",
+    logoImage:       props["Logo Image"]       || "",
+    sponsorImage:    props["Sponsor Image"]    || "",
+    sponsorSize:     props["Sponsor Size"]     || "35%",
+    // Placement preview positioning data
+    logoPosition:    props["Logo Position"]    || "",  // "x:12%,y:15%"
+    logoSizeLabel:   props["Logo Size"]        || "",  // "Medium (2.25″ × 2.75″)"
+    sponsorPosition: props["Sponsor Position"] || "",  // "y:45%"
   };
+}
+
+// ── Placement preview — 600×800 px composite ─────────────────────────────────
+
+// Canvas dimensions match the widget's aspect-ratio: 3/4 container.
+// Overlay % coordinates are percentages of this canvas, exactly as the widget stores them.
+const PREVIEW_W = 600;
+const PREVIEW_H = 800;
+
+// Maps the first word of the "Logo Size" label back to % of canvas width.
+// Labels: "Small (2.00″ × 2.25″)" | "Medium (2.25″ × 2.75″)" | "Large (2.50″ × 3.25″)"
+const LOGO_LABEL_TO_PCT = { Small: 22, Medium: 30, Large: 40 };
+
+function parseLogoPosition(str) {
+  // "x:12%,y:15%" → { x: 12, y: 15 }
+  const xm = str.match(/x:([\d.]+)%/);
+  const ym = str.match(/y:([\d.]+)%/);
+  return {
+    x: xm ? parseFloat(xm[1]) : 12,
+    y: ym ? parseFloat(ym[1]) : 15,
+  };
+}
+
+function parseLogoSizePct(label) {
+  // "Medium (2.25″ × 2.75″)" → extract first word → 30
+  const firstWord = (label || "").trim().split(/[\s(]/)[0];
+  return LOGO_LABEL_TO_PCT[firstWord] ?? 30;
+}
+
+function parseSponsorPositionY(str) {
+  // "y:45%" → 45
+  const m = str.match(/y:([\d.]+)%/);
+  return m ? parseFloat(m[1]) : 45;
+}
+
+function parseSponsorSizePct(str) {
+  // "35%" → 35
+  return parseFloat(str) || 35;
+}
+
+/**
+ * Composite the jersey front image with the customer's logo and/or sponsor
+ * overlaid at the exact positions and sizes they chose in the wizard.
+ *
+ * The result is a 600×800 px PNG that mirrors the widget canvas, giving you
+ * a "what the customer saw" reference for physical transfer placement.
+ *
+ * Returns null if no jersey image URL is supplied, or if neither overlay has
+ * image data (nothing to composite), or on any sharp error.
+ *
+ * @param {object} opts
+ * @param {string|null} opts.jerseyImageUrl   Public Shopify CDN URL for the jersey front image
+ * @param {string|null} opts.logoDataUrl      base64 data URL for the badge
+ * @param {string}      opts.logoPosition     Raw "Logo Position" property value, e.g. "x:12%,y:15%"
+ * @param {string}      opts.logoSizeLabel    Raw "Logo Size" property value, e.g. "Medium (2.25″ × 2.75″)"
+ * @param {string|null} opts.sponsorDataUrl   base64 data URL for the sponsor
+ * @param {string}      opts.sponsorPosition  Raw "Sponsor Position" property value, e.g. "y:45%"
+ * @param {string}      opts.sponsorSizePct   Raw "Sponsor Size" property value, e.g. "35%"
+ * @returns {Promise<string|null>}            base64 PNG string (no data-URL prefix), or null
+ */
+export async function generatePlacementPreview({
+  jerseyImageUrl,
+  logoDataUrl,
+  logoPosition,
+  logoSizeLabel,
+  sponsorDataUrl,
+  sponsorPosition,
+  sponsorSizePct,
+}) {
+  if (!jerseyImageUrl)                  return null;
+  if (!logoDataUrl && !sponsorDataUrl)  return null;
+
+  try {
+    // ── 1. Fetch and resize jersey background to 600×800 ─────────────────────
+    // fit:contain preserves the jersey image's aspect ratio and letterboxes it
+    // with the widget's dark background colour (#111827), exactly mirroring the
+    // CSS in .jersey-customizer__preview.
+    const jerseyResp = await fetch(jerseyImageUrl);
+    if (!jerseyResp.ok) throw new Error(`Jersey image fetch failed: ${jerseyResp.status}`);
+    const jerseyBuf     = Buffer.from(await jerseyResp.arrayBuffer());
+    const jerseyResized = await sharp(jerseyBuf)
+      .resize(PREVIEW_W, PREVIEW_H, {
+        fit:        "contain",
+        background: { r: 17, g: 24, b: 39, alpha: 255 },  // #111827
+      })
+      .png()
+      .toBuffer();
+
+    // ── 2. Build composite layers ─────────────────────────────────────────────
+    const layers = [];
+
+    if (logoDataUrl) {
+      const pos     = parseLogoPosition(logoPosition);
+      const sizePct = parseLogoSizePct(logoSizeLabel);
+      const logoW   = Math.max(Math.round(PREVIEW_W * sizePct / 100), 10);
+
+      const b64     = logoDataUrl.replace(/^data:image\/\w+;base64,/, "");
+      const resized = await sharp(Buffer.from(b64, "base64"))
+        .resize(logoW, logoW, {
+          fit:        "contain",
+          background: { r: 0, g: 0, b: 0, alpha: 0 },
+        })
+        .png()
+        .toBuffer();
+
+      layers.push({
+        input: resized,
+        left:  Math.max(0, Math.round(PREVIEW_W * pos.x / 100)),
+        top:   Math.max(0, Math.round(PREVIEW_H * pos.y / 100)),
+      });
+    }
+
+    if (sponsorDataUrl) {
+      const posY     = parseSponsorPositionY(sponsorPosition);
+      const sizePct  = parseSponsorSizePct(sponsorSizePct);
+      const sponsorW = Math.max(Math.round(PREVIEW_W * sizePct / 100), 10);
+
+      const b64     = sponsorDataUrl.replace(/^data:image\/\w+;base64,/, "");
+      const resized = await sharp(Buffer.from(b64, "base64"))
+        .resize(sponsorW, sponsorW, {
+          fit:        "contain",
+          background: { r: 0, g: 0, b: 0, alpha: 0 },
+        })
+        .png()
+        .toBuffer();
+
+      // Sponsor is always horizontally centred, matching the widget's
+      // left:50%; transform:translateX(-50%) CSS.
+      layers.push({
+        input: resized,
+        left:  Math.max(0, Math.round((PREVIEW_W - sponsorW) / 2)),
+        top:   Math.max(0, Math.round(PREVIEW_H * posY / 100)),
+      });
+    }
+
+    // ── 3. Composite and return ───────────────────────────────────────────────
+    const output = await sharp(jerseyResized)
+      .composite(layers)
+      .png()
+      .toBuffer();
+
+    return output.toString("base64");
+  } catch (err) {
+    console.error("[print-files] generatePlacementPreview failed:", err?.message);
+    return null;
+  }
 }
