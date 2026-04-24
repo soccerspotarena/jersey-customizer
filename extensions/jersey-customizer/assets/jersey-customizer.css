@@ -36,6 +36,7 @@
   background: #111827;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
   user-select: none;
+  container-type: inline-size;
 }
 
 .jersey-customizer__preview--no-image {
@@ -97,7 +98,8 @@
   line-height: 1;
   max-width: 90%;
   text-align: center;
-  word-break: break-word;
+  white-space: nowrap;
+  overflow: visible;
   transition: opacity 0.1s ease, font-family 0s;
 }
 

@@ -981,6 +981,39 @@
     // tuned here if needed after testing the live preview.
     var numLetterSpacing = fontName === "Freshman" ? "0.08em" : "";
     if (numberEl) numberEl.style.letterSpacing = numLetterSpacing;
+    // Re-fit name text — different fonts have very different character widths
+    // (script fonts like Amoresa Aged are much wider than condensed display fonts).
+    fitPreviewText(nameEl);
+  }
+
+  /**
+   * Scales the name preview element horizontally so text always fits on one
+   * line within 90 % of its container.
+   *
+   * Why scaleX (not font-size reduction)?
+   *   Jersey back names are always stretched to fill the label width in the
+   *   actual print file (stretchX=true in opentype.js). scaleX in the preview
+   *   mirrors that behaviour, keeping the visual faithful to the final output.
+   *   It also avoids fighting with the CSS clamp() font-size.
+   *
+   * Why requestAnimationFrame?
+   *   The browser needs a paint pass after a font-family or textContent change
+   *   before scrollWidth reflects the new glyph metrics.
+   */
+  function fitPreviewText(el) {
+    if (!el) return;
+    // Clear any previous scale so scrollWidth reflects natural text width.
+    el.style.transform = "";
+    el.style.transformOrigin = "";
+    requestAnimationFrame(function () {
+      // scrollWidth = natural text width (may exceed offsetWidth when
+      // white-space:nowrap causes overflow beyond max-width:90%).
+      if (el.scrollWidth <= el.offsetWidth) return; // already fits — nothing to do
+      var scale = el.offsetWidth / el.scrollWidth;
+      scale = Math.max(scale, 0.4); // never squish below 40 %
+      el.style.transform = "scaleX(" + scale + ")";
+      el.style.transformOrigin = "center center";
+    });
   }
 
   function applyColor(nameEl, numberEl, color) {
@@ -998,6 +1031,7 @@
       el.textContent = placeholder;
       el.classList.add(cls);
     }
+    fitPreviewText(el);
   }
 
   function validateField(input, errorEl, message) {
