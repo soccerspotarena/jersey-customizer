@@ -27,6 +27,13 @@
     font-style: normal;
     font-display: swap;
   }
+  @font-face {
+    font-family: 'Amoresa Aged';
+    src: url('/apps/jersey-customizer/fonts/amoresa-aged') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
 </style>
 
 {{ 'jersey-customizer.css' | asset_url | stylesheet_tag }}
@@ -437,6 +444,14 @@
           style="font-family: 'Freshman', Impact, sans-serif">
           <span class="jersey-customizer__font-sample">10</span>
           <span class="jersey-customizer__font-label">Freshman</span>
+        </button>
+
+        <button type="button" class="jersey-customizer__font-btn"
+          role="option" aria-selected="false"
+          data-font-name="Amoresa Aged" data-font-css="'Amoresa Aged', serif"
+          style="font-family: 'Amoresa Aged', serif">
+          <span class="jersey-customizer__font-sample">10</span>
+          <span class="jersey-customizer__font-label">Amoresa Aged</span>
         </button>
 
       </div>

@@ -173,7 +173,9 @@ export function generateNumberSVG(number, fontName, colorHex) {
   const numStr = String(number);
 
   // Freshman's digits sit too close together at their natural advance widths.
-  // 0.08 em of extra inter-glyph spacing corrects this; all other fonts use 0.
+  // 0.08 em of extra inter-glyph spacing corrects this.
+  // Amoresa Aged: set to 0 until SVG output is tested — adjust here if spacing
+  // looks too tight or too loose (same pattern as Freshman above).
   const letterSpacingEm = fontName === "Freshman" ? 0.08 : 0;
 
   // stretchX=false: uniform scale so digit proportions are preserved.

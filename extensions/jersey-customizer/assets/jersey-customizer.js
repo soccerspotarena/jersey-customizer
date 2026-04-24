@@ -977,8 +977,10 @@
   function applyFont(nameEl, numberEl, fontCss, fontName) {
     if (nameEl)   nameEl.style.fontFamily   = fontCss;
     if (numberEl) numberEl.style.fontFamily = fontCss;
-    // Freshman's digits sit too close together at their natural advance widths.
-    if (numberEl) numberEl.style.letterSpacing = fontName === "Freshman" ? "0.08em" : "";
+    // Freshman's digits sit too close together; Amoresa Aged spacing can be
+    // tuned here if needed after testing the live preview.
+    var numLetterSpacing = fontName === "Freshman" ? "0.08em" : "";
+    if (numberEl) numberEl.style.letterSpacing = numLetterSpacing;
   }
 
   function applyColor(nameEl, numberEl, color) {

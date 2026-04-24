@@ -29,7 +29,8 @@ const FONT_FILES = {
   Futura:       "josefin-sans-bold.ttf",
   Integral:     "rajdhani-bold.ttf",
   Buinton:      "bebas-neue.ttf",
-  Freshman:     "freshman.ttf",
+  Freshman:       "freshman.ttf",
+  "Amoresa Aged": "amoresa-aged.otf",
 };
 
 const DEFAULT_FILE = "bebas-neue.ttf";
