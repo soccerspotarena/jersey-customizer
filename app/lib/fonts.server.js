@@ -8,13 +8,15 @@
  * Fonts are parsed once and cached in memory for the process lifetime.
  */
 
-import opentype           from "opentype.js";
-import { readFileSync }   from "fs";
-import { join, dirname }  from "path";
-import { fileURLToPath }  from "url";
+import opentype         from "opentype.js";
+import { readFileSync } from "fs";
+import { join }         from "path";
 
-const __dir   = dirname(fileURLToPath(import.meta.url));
-const FONTDIR = join(__dir, "../fonts");
+// process.cwd() is always the project root (/app on Railway, repo root locally).
+// import.meta.url cannot be used here because Remix bundles this file into
+// build/server/index.js — at runtime import.meta.url resolves to the bundle
+// path, making ../fonts point at build/fonts/ instead of app/fonts/.
+const FONTDIR = join(process.cwd(), "app/fonts");
 
 // ── Font registry ──────────────────────────────────────────────────────────────
 

@@ -10,11 +10,9 @@
  */
 
 import { readFileSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { join }         from "path";
 
-const __dir    = dirname(fileURLToPath(import.meta.url));
-const fontPath = join(__dir, "../fonts/freshman.ttf");
+const fontPath = join(process.cwd(), "app/fonts/freshman.ttf");
 
 export const loader = async () => {
   let buf;
