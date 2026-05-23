@@ -71,7 +71,6 @@ export const action = async ({ request }) => {
           n:               1,
           size:            "1024x1024",
           quality:         "standard",
-          style:           "vivid",
           response_format: "b64_json",
         }),
       });
