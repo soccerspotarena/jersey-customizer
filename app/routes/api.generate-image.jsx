@@ -4,7 +4,7 @@
  * CORS-enabled fallback endpoint (not used by the current theme extension,
  * which calls the App Proxy route instead).  Kept for direct testing / curl.
  *
- * Uses DALL-E 3 — mirrors proxy.generate-image.jsx exactly, minus App Proxy auth.
+ * Uses gpt-image-1 — mirrors proxy.generate-image.jsx exactly, minus App Proxy auth.
  */
 
 import { removeBackground } from "../lib/remove-background.server";
@@ -57,6 +57,16 @@ export const action = async ({ request }) => {
     const suffix     = type === "sponsor" ? PROMPT_SUFFIX.sponsor : PROMPT_SUFFIX.logo;
     const fullPrompt = prompt.trim() + suffix;
 
+    const openaiBody = {
+      model:      "gpt-image-1",
+      prompt:     fullPrompt,
+      n:          1,
+      size:       "1024x1024",
+      quality:    "medium",
+      background: "transparent",
+    };
+    console.log("[generate-image] OpenAI request body:", JSON.stringify(openaiBody));
+
     let dalleRes;
     try {
       dalleRes = await fetch("https://api.openai.com/v1/images/generations", {
@@ -65,14 +75,7 @@ export const action = async ({ request }) => {
           "Content-Type":  "application/json",
           "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
         },
-        body: JSON.stringify({
-          model:           "dall-e-3",
-          prompt:          fullPrompt,
-          n:               1,
-          size:            "1024x1024",
-          quality:         "standard",
-          response_format: "b64_json",
-        }),
+        body: JSON.stringify(openaiBody),
       });
     } catch (fetchErr) {
       console.error("[generate-image] Network error:", fetchErr?.message);

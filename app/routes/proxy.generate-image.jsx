@@ -10,16 +10,8 @@ import { removeBackground } from "../lib/remove-background.server";
  * Returns: { imageUrl: string }  — data:image/png;base64,… URI  (1024×1024 PNG)
  *         | { error: string }    — always JSON, never HTML
  *
- * Uses DALL-E 3 (dall-e-3 model) to generate photorealistic sports imagery.
- * The customer's prompt is extended with sport-specific style guidance.
- *
- * response_format "b64_json" is used so the PNG is returned inline as base64.
- * This avoids the temporary OpenAI CDN URLs (which expire after 1 hour) and
- * ensures the data URL stored in the Shopify line-item property never goes stale.
- *
- * Note: DALL-E 3 does not support true alpha-channel transparency.  The
- * "transparent background" modifier in the prompt nudges the model toward
- * clean isolated compositions that are easier to composite onto jerseys.
+ * Uses gpt-image-1 (dall-e-3 was removed from the OpenAI API on May 12 2026).
+ * gpt-image-1 returns base64 natively and supports background:"transparent".
  */
 
 // ── Prompt suffixes (appended to the customer's description) ─────────────────
@@ -72,11 +64,21 @@ export const action = async ({ request }) => {
       );
     }
 
-    // ── Build DALL-E prompt ────────────────────────────────────────────────
+    // ── Build prompt ───────────────────────────────────────────────────────
     const suffix     = type === "sponsor" ? PROMPT_SUFFIX.sponsor : PROMPT_SUFFIX.logo;
     const fullPrompt = prompt.trim() + suffix;
 
-    // ── Call DALL-E 3 ──────────────────────────────────────────────────────
+    // ── Call gpt-image-1 ───────────────────────────────────────────────────
+    const openaiBody = {
+      model:      "gpt-image-1",
+      prompt:     fullPrompt,
+      n:          1,
+      size:       "1024x1024",
+      quality:    "medium",
+      background: "transparent",
+    };
+    console.log("[generate-image] OpenAI request body:", JSON.stringify(openaiBody));
+
     let dalleRes;
     try {
       dalleRes = await fetch("https://api.openai.com/v1/images/generations", {
@@ -85,14 +87,7 @@ export const action = async ({ request }) => {
           "Content-Type":  "application/json",
           "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
         },
-        body: JSON.stringify({
-          model:           "dall-e-3",
-          prompt:          fullPrompt,
-          n:               1,
-          size:            "1024x1024",
-          quality:         "standard",
-          response_format: "b64_json",
-        }),
+        body: JSON.stringify(openaiBody),
       });
     } catch (fetchErr) {
       console.error("[generate-image] Network error calling OpenAI:", fetchErr?.message);
@@ -117,7 +112,7 @@ export const action = async ({ request }) => {
     const b64       = dalleData.data?.[0]?.b64_json;
 
     if (!b64) {
-      console.error("[generate-image] Unexpected DALL-E response shape:", JSON.stringify(dalleData).slice(0, 300));
+      console.error("[generate-image] Unexpected OpenAI response shape:", JSON.stringify(dalleData).slice(0, 300));
       return json(
         { error: "Could not generate an image. Try a different description." },
         { status: 500 }
